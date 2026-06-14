@@ -1,0 +1,18 @@
+# Local run for Lab 3. By default builds the SECURE image; flip the dockerfile
+# field to `Dockerfile` to reproduce the insecure baseline for scanning.
+services:
+  todo:
+    build:
+      context: .
+      dockerfile: Dockerfile.secure
+    image: todo-app:secure
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    # Run migrations then serve. (The secure image's CMD is gunicorn; here we
+    # override to also prep the SQLite DB for a quick local demo.)
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 todo.wsgi:application"
+    restart: unless-stopped

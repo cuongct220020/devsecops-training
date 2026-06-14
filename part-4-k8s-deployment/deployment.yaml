@@ -1,0 +1,27 @@
+# =============================================================================
+# Lab 4 — UNOPTIMIZED starting manifest (Section 4.2).
+#
+# Scan it first:  trivy config deployment.yaml
+# Trivy flags the missing securityContext (privilege escalation, writable root
+# filesystem, runs as root) and absent resource limits. Harden it using
+# deployment.secure.yaml as the reference solution (Section 4.4).
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      containers:
+      - name: todo-app
+        image: todo-app:secure
+        ports:
+        - containerPort: 8000

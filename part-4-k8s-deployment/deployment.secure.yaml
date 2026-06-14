@@ -1,0 +1,89 @@
+# =============================================================================
+# Lab 4 — HARDENED manifest (Section 4.4).
+#
+# Verify it passes Trivy: trivy config deployment.secure.yaml
+# Apply it:               kubectl apply -f deployment.secure.yaml
+#
+# Mitigations applied to satisfy the CIS Kubernetes checks Trivy enforces:
+#   * allowPrivilegeEscalation: false, capabilities drop ALL
+#   * readOnlyRootFilesystem: true (with emptyDir mounts for the paths the app
+#     must still write to — /tmp and the SQLite data dir)
+#   * runAsNonRoot + runAsUser 999 (matches the image's appuser)
+#   * explicit CPU/memory requests and limits
+#   * liveness/readiness probes against the app's /healthz/ endpoint
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-deployment
+  labels:
+    app: todo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: todo-app
+        image: todo-app:secure
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        # Inject the secret from a Kubernetes Secret, never the image.
+        # Create it with:
+        #   kubectl create secret generic todo-secrets \
+        #     --from-literal=SECRET_KEY="$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')"
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: todo-secrets
+              key: SECRET_KEY
+        # Strict SecurityContext matching CIS standards.
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 999
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /healthz/
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /healthz/
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # readOnlyRootFilesystem blocks all writes, so mount writable scratch
+        # space where the runtime genuinely needs it.
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: data
+          mountPath: /app/data
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: data
+        emptyDir: {}

@@ -1,0 +1,38 @@
+# Secrets / local env
+.env
+*.env
+!.env.example
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+.terraform.lock.hcl
+
+# OpenSCAP reports
+*.html
+report-*.xml
+
+# kube-bench artifacts
+kube-bench*
+*.tar.gz
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+staticfiles/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/

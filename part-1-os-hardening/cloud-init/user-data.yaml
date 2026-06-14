@@ -1,0 +1,24 @@
+#cloud-config
+# Intentionally minimal: we want a stock Ubuntu 24.04 so the OpenSCAP baseline
+# scan (Lab 1.3) reveals a realistically low CIS compliance score.
+hostname: ubuntu2404-lab
+manage_etc_hosts: true
+
+users:
+  - name: ${ssh_username}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [adm, sudo]
+    shell: /bin/bash
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+ssh_pwauth: false
+disable_root: true
+
+package_update: true
+packages:
+  - qemu-guest-agent
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent

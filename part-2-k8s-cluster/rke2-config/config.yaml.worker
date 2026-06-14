@@ -1,0 +1,18 @@
+# /etc/rancher/rke2/config.yaml  (WORKER / agent node)
+#
+# The worker must carry the SAME CIS profile so its kubelet is hardened to
+# match the control plane (kube-bench `--targets node` checks).
+profile: "cis-1.23"
+selinux: true
+
+# Point the agent at the master's API server (port 9345 is RKE2's
+# supervisor/registration port). Replace the host with your master's IP/DNS.
+server: "https://rke2-master:9345"
+
+# Cluster join secret. Read it on the master from:
+#   sudo cat /var/lib/rancher/rke2/server/node-token
+# then paste the value here (or inject it via install.sh / a Secret manager).
+token: "REPLACE_WITH_NODE_TOKEN_FROM_MASTER"
+
+node-label:
+  - "node-role.lab/worker=true"

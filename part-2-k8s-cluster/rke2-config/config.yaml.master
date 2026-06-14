@@ -1,0 +1,25 @@
+# /etc/rancher/rke2/config.yaml  (MASTER / server node)
+#
+# Enabling the CIS profile makes RKE2 apply hardened defaults at bootstrap:
+# etcd encryption, restrictive file permissions, NetworkPolicies, a locked-down
+# admission config and a non-root, no-new-privileges kubelet. With this in
+# place most kube-bench control-plane checks (Lab 2.3) pass out of the box.
+profile: "cis-1.23"
+selinux: true
+
+# Required by the CIS profile: the kernel must enforce the etcd user/group and
+# protect-kernel-defaults. RKE2 refuses to start under the CIS profile unless
+# the host has the `etcd` user present (created by install.sh) and the
+# hardening sysctls applied (see /usr/local/share/rke2/rke2-cis-sysctl.conf).
+
+write-kubeconfig-mode: "0600"
+
+# TLS SANs let you reach the API server by hostname/VIP as well as node IP.
+# Replace these with your master's address(es).
+tls-san:
+  - "rke2-master"
+
+# Pod Security Admission + an explicit audit policy ship with the CIS profile;
+# nothing extra needed here. Add node labels/taints below if desired.
+node-label:
+  - "node-role.lab/control-plane=true"

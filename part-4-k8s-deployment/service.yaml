@@ -1,0 +1,15 @@
+# Lab 4 (Section 4.4) — exposes the deployment to the lab network via NodePort.
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-service
+  labels:
+    app: todo
+spec:
+  type: NodePort
+  selector:
+    app: todo
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30080 # Port exposed to the external lab network
