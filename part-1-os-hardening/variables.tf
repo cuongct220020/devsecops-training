@@ -4,22 +4,24 @@ variable "libvirt_uri" {
   default     = "qemu:///system"
 }
 
-variable "vm_name" {
-  description = "Name of the VM domain created in libvirt."
+# Cluster nodes provisioned for the whole series. node1 doubles as the Lab 1
+# OpenSCAP hardening target and the Lab 2 RKE2 master; node2 is the worker.
+variable "nodes" {
+  description = "Map of node name => {vcpu, memory_mib} to provision."
+  type = map(object({
+    vcpu       = number
+    memory_mib = number
+  }))
+  default = {
+    "node1-master" = { vcpu = 2, memory_mib = 4096 }
+    "node2-worker" = { vcpu = 2, memory_mib = 3072 }
+  }
+}
+
+variable "name_prefix" {
+  description = "Prefix for libvirt domain and volume names."
   type        = string
-  default     = "ubuntu2404-hardening-lab"
-}
-
-variable "vcpu" {
-  description = "Number of virtual CPUs for the VM."
-  type        = number
-  default     = 2
-}
-
-variable "memory" {
-  description = "Memory for the VM in MiB."
-  type        = number
-  default     = 2048
+  default     = "devsecops"
 }
 
 variable "disk_size" {
@@ -35,7 +37,7 @@ variable "pool_name" {
 }
 
 variable "network_name" {
-  description = "Libvirt network the VM attaches to."
+  description = "Libvirt network the VMs attach to."
   type        = string
   default     = "default"
 }
@@ -53,7 +55,7 @@ variable "ssh_username" {
 }
 
 variable "ssh_public_key" {
-  description = "Path to the SSH public key injected into the VM for passwordless login."
+  description = "Path to the SSH public key injected into the VMs for passwordless login."
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
+  default     = "~/.ssh/id_ed25519.pub"
 }

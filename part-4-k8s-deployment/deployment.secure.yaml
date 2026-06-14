@@ -47,6 +47,11 @@ spec:
             secretKeyRef:
               name: todo-secrets
               key: SECRET_KEY
+        # With DEBUG off, Django validates the Host header. Probes hit the pod
+        # IP and NodePort traffic carries the node IP, so allow them through.
+        # In production, list concrete hostnames instead of a wildcard.
+        - name: DJANGO_ALLOWED_HOSTS
+          value: "*"
         # Strict SecurityContext matching CIS standards.
         securityContext:
           allowPrivilegeEscalation: false

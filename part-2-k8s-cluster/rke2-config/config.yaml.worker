@@ -2,8 +2,8 @@
 #
 # The worker must carry the SAME CIS profile so its kubelet is hardened to
 # match the control plane (kube-bench `--targets node` checks).
-profile: "cis-1.23"
-selinux: true
+profile: "cis"
+# selinux: true   # RHEL/CoreOS only — Ubuntu uses AppArmor, leave this off.
 
 # Point the agent at the master's API server (port 9345 is RKE2's
 # supervisor/registration port). Replace the host with your master's IP/DNS.

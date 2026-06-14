@@ -1,0 +1,77 @@
+
+Report Summary
+
+┌────────────────────────┬────────────┬───────────────────┐
+│         Target         │    Type    │ Misconfigurations │
+├────────────────────────┼────────────┼───────────────────┤
+│ deployment.secure.yaml │ kubernetes │         3         │
+├────────────────────────┼────────────┼───────────────────┤
+│ service.yaml           │ kubernetes │         0         │
+└────────────────────────┴────────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+deployment.secure.yaml (kubernetes)
+===================================
+Tests: 99 (SUCCESSES: 96, FAILURES: 3)
+Failures: 3 (UNKNOWN: 0, LOW: 3, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
+
+KSV-0020 (LOW): Container 'todo-app' of Deployment 'todo-deployment' should set 'securityContext.runAsUser' > 10000
+════════════════════════════════════════
+Force the container to run with user ID > 10000 to avoid conflicts with the host’s user table.
+
+See https://avd.aquasec.com/misconfig/ksv-0020
+────────────────────────────────────────
+ deployment.secure.yaml:35-84
+────────────────────────────────────────
+  35 ┌       - name: todo-app
+  36 │         image: todo-app:secure
+  37 │         imagePullPolicy: IfNotPresent
+  38 │         ports:
+  39 │         - containerPort: 8000
+  40 │         env:
+  41 │         # Inject the secret from a Kubernetes Secret, never the image.
+  42 │         # Create it with:
+  43 └         #   kubectl create secret generic todo-secrets \
+  ..   
+────────────────────────────────────────
+
+
+KSV-0021 (LOW): Container 'todo-app' of Deployment 'todo-deployment' should set 'securityContext.runAsGroup' > 10000
+════════════════════════════════════════
+Force the container to run with group ID > 10000 to avoid conflicts with the host’s user table.
+
+See https://avd.aquasec.com/misconfig/ksv-0021
+────────────────────────────────────────
+ deployment.secure.yaml:35-84
+────────────────────────────────────────
+  35 ┌       - name: todo-app
+  36 │         image: todo-app:secure
+  37 │         imagePullPolicy: IfNotPresent
+  38 │         ports:
+  39 │         - containerPort: 8000
+  40 │         env:
+  41 │         # Inject the secret from a Kubernetes Secret, never the image.
+  42 │         # Create it with:
+  43 └         #   kubectl create secret generic todo-secrets \
+  ..   
+────────────────────────────────────────
+
+
+KSV-0110 (LOW): deployment todo-deployment in default namespace should set metadata.namespace to a non-default namespace
+════════════════════════════════════════
+Checks whether a workload is running in the default namespace.
+
+See https://avd.aquasec.com/misconfig/ksv-0110
+────────────────────────────────────────
+ deployment.secure.yaml:17-20
+────────────────────────────────────────
+  17 ┌ metadata:
+  18 │   name: todo-deployment
+  19 │   labels:
+  20 └     app: todo
+────────────────────────────────────────
+
+

@@ -4,8 +4,10 @@
 # etcd encryption, restrictive file permissions, NetworkPolicies, a locked-down
 # admission config and a non-root, no-new-privileges kubelet. With this in
 # place most kube-bench control-plane checks (Lab 2.3) pass out of the box.
-profile: "cis-1.23"
-selinux: true
+# RKE2 v1.25+ uses the generic "cis" value, which selects the latest bundled
+# CIS benchmark. (The old "cis-1.23" value was removed in newer releases.)
+profile: "cis"
+# selinux: true   # RHEL/CoreOS only — Ubuntu uses AppArmor, leave this off.
 
 # Required by the CIS profile: the kernel must enforce the etcd user/group and
 # protect-kernel-defaults. RKE2 refuses to start under the CIS profile unless
