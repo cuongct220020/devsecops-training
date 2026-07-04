@@ -1,0 +1,36 @@
+# Define the pre-commit security hooks
+repos:
+  # 1. Integrate Gitleaks to protect sensitive information (Secrets Scanning)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2 # Use a stable Gitleaks version
+    hooks:
+      - id: gitleaks
+        name: Gitleaks (Secrets Scanner)
+        description: Scan for exposed passwords and other sensitive tokens before commit
+        entry: gitleaks protect --verbose --staged
+
+  # 2. Integrate Checkov to scan YAML/Terraform infrastructure code (IaC Static Analysis)
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.2.327 # Use a compatible Checkov version
+    hooks:
+      - id: checkov
+        name: Checkov (IaC Scanner)
+        description: Scan for security configuration issues in Kubernetes manifests and Terraform
+        # Only scan relevant files in the related folders to optimize commit time
+        files: ^(01-os-hardening/.*\.tf|04-k8s-deployment/.*\.yaml)$
+        # Load configuration from your corresponding config files if available
+        args: [--quiet, --compact]
+        language: python
+
+  # 3. Integrate Trivy
+  - repo: local
+    hooks:
+      - id: trivy-fs
+        name: Trivy (SCA Dependency Scanner)
+        description: Scan for open-source vulnerabilities in the `requirements.txt` file
+        entry: trivy fs
+        # Only run this scan when `requirements.txt` or related YAML files change
+        files: ^(03-app-security/requirements\.txt|04-k8s-deployment/.*\.yaml)$
+        language: system
+        # Blocking configuration: only block commit if HIGH or CRITICAL issues are found
+        args: [--severity, HIGH,CRITICAL, --exit-code, "1", .]
